@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -23,6 +25,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.log4j.Logger;
@@ -35,8 +38,14 @@ import ca.wlu.gisql.gui.util.EnvironmentTreeView.AstNodeTreeNode;
 import ca.wlu.gisql.gui.view.InteractomeResultView;
 import ca.wlu.gisql.interactome.CachedInteractome;
 import ca.wlu.gisql.interactome.Interactome;
+import ca.wlu.gisql.runner.AstContext;
+import ca.wlu.gisql.runner.ExpressionContext;
 import ca.wlu.gisql.runner.ExpressionError;
 import ca.wlu.gisql.runner.ExpressionRunListener;
+import ca.wlu.gisql.runner.FileContext;
+import ca.wlu.gisql.runner.FileLineContext;
+import ca.wlu.gisql.runner.PositionContext;
+import ca.wlu.gisql.runner.SingleLineContext;
 import ca.wlu.gisql.runner.ThreadedExpressionRunner;
 
 import com.sun.forums.closabletab.ClosableTabbedPaneUI;
@@ -161,8 +170,64 @@ public class MainFrame extends JFrame implements ActionListener,
 		}
 	}
 
+	private DefaultMutableTreeNode reportErrorNode(DefaultMutableTreeNode root,
+			Map<ExpressionContext, DefaultMutableTreeNode> map,
+			ExpressionContext context) {
+		if (map.containsKey(context)) {
+			return map.get(context);
+		}
+
+		DefaultMutableTreeNode result;
+
+		if (context instanceof PositionContext) {
+			PositionContext positioncontext = (PositionContext) context;
+
+			result = new DefaultMutableTreeNode("Position "
+					+ positioncontext.getPosition());
+			reportErrorNode(root, map, positioncontext.getParent()).add(result);
+		} else if (context instanceof SingleLineContext) {
+			SingleLineContext singlelinecontext = (SingleLineContext) context;
+
+			result = new DefaultMutableTreeNode("Command: "
+					+ singlelinecontext.getLine());
+			root.add(result);
+		} else if (context instanceof FileLineContext) {
+			FileLineContext filelinecontext = (FileLineContext) context;
+
+			result = new DefaultMutableTreeNode("Line"
+					+ filelinecontext.getLineNumber());
+			reportErrorNode(root, map, filelinecontext.getParent()).add(result);
+		} else if (context instanceof FileContext) {
+			FileContext filecontext = (FileContext) context;
+			result = new DefaultMutableTreeNode(filecontext.getFile().getName());
+			root.add(result);
+		} else if (context instanceof AstContext) {
+			AstContext astcontext = (AstContext) context;
+
+			result = new DefaultMutableTreeNode("Expression ("
+					+ astcontext.getNode() + ")");
+
+			reportErrorNode(root, map, astcontext.getParent()).add(result);
+		} else {
+			result = new DefaultMutableTreeNode("<unknown>");
+		}
+		map.put(context, result);
+		return result;
+	}
+
 	public void reportErrors(Collection<ExpressionError> errors) {
-		// TODO Auto-generated method stub
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Errors Found");
+		java.util.Map<ExpressionContext, DefaultMutableTreeNode> map = new HashMap<ExpressionContext, DefaultMutableTreeNode>();
+		for (ExpressionError error : errors) {
+			DefaultMutableTreeNode node = reportErrorNode(root, map, error
+					.getContext());
+			node.add(new DefaultMutableTreeNode(error.getMessage()));
+		}
+		JTree errortree = new JTree(root);
+		results.addTab("Errors", errortree);
+		for (int index = 0; index < errortree.getRowCount(); index++) {
+			errortree.expandRow(index);
+		}
 
 	}
 
