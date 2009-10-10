@@ -6,6 +6,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import ca.wlu.gisql.ast.AstNative;
 import ca.wlu.gisql.ast.AstNode;
 import ca.wlu.gisql.gui.util.EnvironmentTreeView.AstNodeTreeNode;
 import ca.wlu.gisql.util.ShowableStringBuilder;
@@ -27,8 +28,13 @@ public class InteractomeTreeCellRender implements TreeCellRenderer {
 			if (value instanceof AstNodeTreeNode) {
 				AstNode node = ((AstNodeTreeNode) value).getNode();
 				if (node != null) {
-					treerenderer.setToolTipText(ShowableStringBuilder.toString(
-							node, null));
+					if (node instanceof AstNative) {
+						treerenderer.setToolTipText(((AstNative) node)
+								.getDescription());
+					} else {
+						treerenderer.setToolTipText(ShowableStringBuilder
+								.toString(node, null));
+					}
 					return treerenderer;
 				}
 			}
