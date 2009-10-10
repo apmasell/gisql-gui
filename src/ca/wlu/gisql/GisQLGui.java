@@ -1,6 +1,6 @@
 package ca.wlu.gisql;
 
-import javax.swing.JOptionPane;
+import java.util.Properties;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
@@ -10,23 +10,24 @@ import ca.wlu.gisql.db.DatabaseEnvironment;
 import ca.wlu.gisql.db.DatabaseManager;
 import ca.wlu.gisql.environment.UserEnvironment;
 import ca.wlu.gisql.gui.MainFrame;
+import ca.wlu.gisql.gui.login.LoginDialog;
 
 public class GisQLGui {
 	public static void main(String[] args) {
 		ConsoleAppender appender = new ConsoleAppender(new PatternLayout());
 		Logger.getRootLogger().addAppender(appender);
 
-		DatabaseManager dm;
+		Properties properties;
 		try {
-			dm = new DatabaseManager(DatabaseManager.getPropertiesFromFile());
+			properties = DatabaseManager.getPropertiesFromFile();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null,
-					"Failed to connect to database.", "Error - gisQL",
-					JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			return;
+			properties = new Properties();
 		}
 
+		DatabaseManager dm = LoginDialog.connect(null, properties);
+		if (dm == null) {
+			return;
+		}
 		UserEnvironment environment = new UserEnvironment(
 				new DatabaseEnvironment(dm));
 		MainFrame frame = new MainFrame(environment);
