@@ -6,12 +6,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.GroupLayout;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -23,6 +27,8 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -154,6 +160,34 @@ public class MainFrame extends JFrame implements ActionListener,
 		}
 	}
 
+	private JComponent makeComponentWrapper(Object value) {
+		if (value instanceof List<?>) {
+			JPanel panel = new JPanel();
+			GroupLayout layout = new GroupLayout(panel);
+			panel.setLayout(layout);
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+
+			ParallelGroup horizontalgroup = layout.createParallelGroup();
+			SequentialGroup verticalgroup = layout.createSequentialGroup();
+
+			for (Object object : (List<?>) value) {
+				JComponent component = makeComponentWrapper(object);
+				horizontalgroup.addComponent(component);
+				verticalgroup.addComponent(component);
+			}
+			layout.setHorizontalGroup(horizontalgroup);
+			layout.setVerticalGroup(verticalgroup);
+			return new JScrollPane(panel);
+		} else {
+			JTextArea text = new JTextArea(value.toString());
+			text.setEditable(false);
+			text.setLineWrap(true);
+			text.setWrapStyleWord(true);
+			return new JScrollPane(text);
+		}
+	}
+
 	public void processInteractome(Interactome value) {
 		CachedInteractome interactome = (CachedInteractome) value;
 		results.addTab(value.toString(), new InteractomeResultView(interactome,
@@ -164,9 +198,7 @@ public class MainFrame extends JFrame implements ActionListener,
 		if (type == Type.UnitType) {
 			return;
 		} else {
-			JTextArea text = new JTextArea(value.toString());
-			text.setEditable(false);
-			results.addTab(type.toString(), text);
+			results.addTab(type.toString(), makeComponentWrapper(value));
 		}
 	}
 

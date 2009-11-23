@@ -8,7 +8,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import ca.wlu.gisql.ast.AstNode;
+import ca.wlu.gisql.ast.type.Type;
 import ca.wlu.gisql.environment.Environment;
 import ca.wlu.gisql.environment.EnvironmentListener;
 
@@ -18,14 +18,14 @@ public class EnvironmentTreeView extends DefaultTreeModel implements
 	public static class AstNodeTreeNode extends DefaultMutableTreeNode {
 
 		private static final long serialVersionUID = 6806723183738094759L;
-		private final AstNode node;
+		private final Object node;
 
-		private AstNodeTreeNode(String name, AstNode node) {
+		private AstNodeTreeNode(String name, Object node) {
 			super(name);
 			this.node = node;
 		}
 
-		public AstNode getNode() {
+		public Object getNode() {
 			return node;
 		}
 	}
@@ -43,16 +43,16 @@ public class EnvironmentTreeView extends DefaultTreeModel implements
 		prepareTree();
 	}
 
-	public void addedEnvironmentVariable(String name, AstNode node) {
+	public void addedEnvironmentVariable(String name, Object value, Type type) {
 		prepareTree();
 	}
 
-	private void appendFromMap(String name, SortedMap<String, AstNode> map) {
-		if (map.size() == 0) {
+	private void appendFromMap(String name, SortedMap<String, Object> sortedMap) {
+		if (sortedMap.size() == 0) {
 			return;
 		}
 		DefaultMutableTreeNode tree = new DefaultMutableTreeNode(name);
-		for (Entry<String, AstNode> entry : map.entrySet()) {
+		for (Entry<String, Object> entry : sortedMap.entrySet()) {
 			DefaultMutableTreeNode child = new AstNodeTreeNode(entry.getKey(),
 					entry.getValue());
 			tree.add(child);
@@ -60,7 +60,7 @@ public class EnvironmentTreeView extends DefaultTreeModel implements
 		root.add(tree);
 	}
 
-	public void droppedEnvironmentVariable(String name, AstNode node) {
+	public void droppedEnvironmentVariable(String name, Object value, Type type) {
 		prepareTree();
 	}
 
@@ -72,20 +72,20 @@ public class EnvironmentTreeView extends DefaultTreeModel implements
 		if (SwingUtilities.isEventDispatchThread()) {
 			root.removeAllChildren();
 
-			SortedMap<String, SortedMap<String, AstNode>> typemap = new TreeMap<String, SortedMap<String, AstNode>>();
-			for (Entry<String, AstNode> entry : environment) {
-				String type = entry.getValue().getType().toString();
+			SortedMap<String, SortedMap<String, Object>> typemap = new TreeMap<String, SortedMap<String, Object>>();
+			for (Entry<String, Object> entry : environment) {
+				String type = environment.getTypeOf(entry.getKey()).toString();
 
-				SortedMap<String, AstNode> valuemap = typemap.get(type);
+				SortedMap<String, Object> valuemap = typemap.get(type);
 				if (valuemap == null) {
-					valuemap = new TreeMap<String, AstNode>();
+					valuemap = new TreeMap<String, Object>();
 					typemap.put(type, valuemap);
 				}
 				valuemap.put(entry.getKey(), entry.getValue());
 
 			}
 
-			for (Entry<String, SortedMap<String, AstNode>> entry : typemap
+			for (Entry<String, SortedMap<String, Object>> entry : typemap
 					.entrySet()) {
 				appendFromMap(entry.getKey(), entry.getValue());
 			}

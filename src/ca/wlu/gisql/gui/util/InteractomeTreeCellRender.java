@@ -7,9 +7,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
 import ca.wlu.gisql.ast.AstNative;
-import ca.wlu.gisql.ast.AstNode;
+import ca.wlu.gisql.ast.util.GenericFunction;
 import ca.wlu.gisql.gui.util.EnvironmentTreeView.AstNodeTreeNode;
-import ca.wlu.gisql.util.ShowableStringBuilder;
 
 public class InteractomeTreeCellRender implements TreeCellRenderer {
 
@@ -26,14 +25,13 @@ public class InteractomeTreeCellRender implements TreeCellRenderer {
 				expanded, leaf, row, hasFocus);
 		if (value != null) {
 			if (value instanceof AstNodeTreeNode) {
-				AstNode node = ((AstNodeTreeNode) value).getNode();
+				Object node = ((AstNodeTreeNode) value).getNode();
 				if (node != null) {
-					if (node instanceof AstNative) {
+					if (node instanceof GenericFunction) {
 						treerenderer.setToolTipText(((AstNative) node)
 								.getDescription());
 					} else {
-						treerenderer.setToolTipText(ShowableStringBuilder
-								.toString(node, null));
+						treerenderer.setToolTipText(node.toString());
 					}
 					return treerenderer;
 				}
