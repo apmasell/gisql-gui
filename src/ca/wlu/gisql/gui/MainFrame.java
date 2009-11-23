@@ -37,6 +37,7 @@ import javax.swing.tree.TreeSelectionModel;
 import org.apache.log4j.Logger;
 
 import ca.wlu.gisql.ast.type.Type;
+import ca.wlu.gisql.ast.util.BuiltInResolver;
 import ca.wlu.gisql.environment.UserEnvironment;
 import ca.wlu.gisql.gui.util.EnvironmentTreeView;
 import ca.wlu.gisql.gui.util.InteractomeTreeCellRender;
@@ -73,11 +74,15 @@ public class MainFrame extends JFrame implements ActionListener,
 
 	private final FilterBox filter = new FilterBox();
 
+	private final JComponent help;
+
 	private final JSplitPane innersplitpane = new JSplitPane();
 
 	private final JMenuBar menu = new JMenuBar();
 
 	private final JMenuItem menuClear = new JMenuItem("Clear Variables");
+
+	private final JMenuItem menuHelp = new JMenuItem("Help");
 
 	private final JMenu menuMain = new JMenu("Main");
 
@@ -103,6 +108,13 @@ public class MainFrame extends JFrame implements ActionListener,
 
 		runner = new ThreadedExpressionRunner(environment,
 				new SwingThreadBouncer(this));
+
+		JTextArea helptext = new JTextArea(environment.getParserKb().getHelp()
+				+ "\n" + BuiltInResolver.getHelp());
+		helptext.setEditable(false);
+		helptext.setLineWrap(true);
+		helptext.setWrapStyleWord(true);
+		help = new JScrollPane(helptext);
 
 		timer = new Timer(100, this);
 
@@ -132,6 +144,11 @@ public class MainFrame extends JFrame implements ActionListener,
 
 		menuClear.addActionListener(this);
 		menuMain.add(menuClear);
+
+		menuHelp.setAccelerator(KeyStroke.getKeyStroke(
+				java.awt.event.KeyEvent.VK_F1, 0));
+		menuHelp.addActionListener(this);
+		menuMain.add(menuHelp);
 		menuMain.add(quitseparator);
 
 		menuQuit.setAccelerator(KeyStroke.getKeyStroke(
@@ -155,6 +172,9 @@ public class MainFrame extends JFrame implements ActionListener,
 			busy.setIndeterminate(runner.isBusy());
 		} else if (evt.getSource() == menuClear) {
 			environment.clear();
+		} else if (evt.getSource() == menuHelp) {
+			results.addTab("Help", help);
+			results.setSelectedIndex(results.getTabCount() - 1);
 		} else if (evt.getSource() == menuQuit) {
 			System.exit(0);
 		}
