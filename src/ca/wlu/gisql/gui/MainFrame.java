@@ -192,6 +192,7 @@ public class MainFrame extends JFrame implements ActionListener,
 		CachedInteractome interactome = (CachedInteractome) value;
 		results.addTab(value.toString(), new InteractomeResultView(interactome,
 				filter));
+		results.setSelectedIndex(results.getTabCount() - 1);
 	}
 
 	public void processOther(Type type, Object value) {
@@ -199,6 +200,7 @@ public class MainFrame extends JFrame implements ActionListener,
 			return;
 		} else {
 			results.addTab(type.toString(), makeComponentWrapper(value));
+			results.setSelectedIndex(results.getTabCount() - 1);
 		}
 	}
 
@@ -257,6 +259,7 @@ public class MainFrame extends JFrame implements ActionListener,
 		}
 		JTree errortree = new JTree(root);
 		results.addTab("Errors", errortree);
+		results.setSelectedIndex(results.getTabCount() - 1);
 		for (int index = 0; index < errortree.getRowCount(); index++) {
 			errortree.expandRow(index);
 		}
