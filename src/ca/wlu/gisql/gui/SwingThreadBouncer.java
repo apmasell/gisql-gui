@@ -1,9 +1,11 @@
 package ca.wlu.gisql.gui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import javax.swing.SwingUtilities;
 
+import ca.wlu.gisql.ast.AstNode;
 import ca.wlu.gisql.ast.type.Type;
 import ca.wlu.gisql.interactome.CachedInteractome;
 import ca.wlu.gisql.interactome.Interactome;
@@ -16,6 +18,27 @@ public final class SwingThreadBouncer implements ExpressionRunListener {
 
 	public SwingThreadBouncer(ExpressionRunListener parent) {
 		this.parent = parent;
+	}
+
+	@Override
+	public boolean previewAst(final AstNode node) {
+		if (SwingUtilities.isEventDispatchThread()) {
+			return parent.previewAst(node);
+		} else {
+			final boolean[] result = new boolean[1];
+			try {
+				SwingUtilities.invokeAndWait(new Runnable() {
+					public void run() {
+						result[0] = parent.previewAst(node);
+					}
+				});
+				return result[0];
+			} catch (InterruptedException e) {
+				return true;
+			} catch (InvocationTargetException e) {
+				return true;
+			}
+		}
 	}
 
 	public void processInteractome(final Interactome value) {
