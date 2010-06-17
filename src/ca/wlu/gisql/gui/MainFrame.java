@@ -163,6 +163,7 @@ public class MainFrame extends JFrame implements ActionListener,
 
 		pack();
 		timer.start();
+		runner.start();
 	}
 
 	public void actionPerformed(ActionEvent evt) {
