@@ -125,8 +125,8 @@ public class LoginDialog extends JDialog implements ActionListener {
 			} catch (Exception ex) {
 				log.error("Failed to connect to database.", ex);
 				JOptionPane.showMessageDialog(parent,
-						"Failed to connect to database.", "gisQL",
-						JOptionPane.ERROR_MESSAGE);
+						"Failed to connect to database. " + ex.getMessage(),
+						"gisQL", JOptionPane.ERROR_MESSAGE);
 				databasemanager = null;
 				return;
 			}
