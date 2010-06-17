@@ -7,7 +7,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
 import ca.wlu.gisql.ast.AstNative;
-import ca.wlu.gisql.ast.util.GenericFunction;
 import ca.wlu.gisql.gui.util.EnvironmentTreeView.AstNodeTreeNode;
 
 public class InteractomeTreeCellRender implements TreeCellRenderer {
@@ -27,7 +26,7 @@ public class InteractomeTreeCellRender implements TreeCellRenderer {
 			if (value instanceof AstNodeTreeNode) {
 				Object node = ((AstNodeTreeNode) value).getNode();
 				if (node != null) {
-					if (node instanceof GenericFunction) {
+					if (node instanceof AstNative) {
 						treerenderer.setToolTipText(((AstNative) node)
 								.getDescription());
 					} else {
