@@ -13,14 +13,19 @@ import ca.wlu.gisql.gui.MainFrame;
 import ca.wlu.gisql.gui.login.LoginDialog;
 
 public class GisQLGui {
+	protected static final Logger log = Logger.getLogger(GisQLGui.class);
+
 	public static void main(String[] args) {
 		ConsoleAppender appender = new ConsoleAppender(new PatternLayout());
 		Logger.getRootLogger().addAppender(appender);
 
-		Properties properties;
+		Properties properties = null;
 		try {
 			properties = DatabaseManager.getPropertiesFromFile();
 		} catch (Exception e) {
+			log.warn("Could not access config file.", e);
+		}
+		if (properties == null) {
 			properties = new Properties();
 		}
 
